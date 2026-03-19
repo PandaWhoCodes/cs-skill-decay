@@ -106,6 +106,36 @@ export default function Results({ results, onRestart }: { results: QuizResults; 
         </div>
       </div>
 
+      {/* Question Sources */}
+      <div className="w-full rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8">
+        <p className="font-[family-name:var(--font-jetbrains)] text-xs uppercase tracking-wider text-[var(--text-dim)] mb-4">
+          Scenarios based on real incidents
+        </p>
+        <ul className="flex flex-col gap-2 text-sm text-[var(--text-dim)]">
+          <li>
+            Q1: <a href="https://nee.lv/2021/02/28/How-I-cut-GTA-Online-loading-times-by-70/" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">How I cut GTA Online loading times by 70%</a> — accidentally quadratic parsing
+          </li>
+          <li>
+            Q2: <a href="https://brooker.co.za/blog/2024/05/09/nagle.html" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">It&apos;s always TCP_NODELAY</a> — Nagle + delayed ACK interaction
+          </li>
+          <li>
+            Q3: <a href="https://blog.cloudflare.com/details-of-the-cloudflare-outage-on-july-2-2019/" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">Cloudflare outage, July 2 2019</a> — catastrophic regex backtracking
+          </li>
+          <li>
+            Q4: <a href="https://en.wikipedia.org/wiki/Thundering_herd_problem" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">Thundering herd problem</a> — cache stampede
+          </li>
+          <li>
+            Q5: <a href="https://lwn.net/Articles/474912/" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">Denial of service via hash collisions</a> — HashDoS attack
+          </li>
+          <li>
+            Q6: <a href="https://dzone.com/articles/never-use-float-and-double-for-monetary-calculatio" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">Never use float for monetary calculations</a> — IEEE 754 rounding
+          </li>
+          <li>
+            Q7: <a href="https://www.anthropic.com/research/how-ai-is-transforming-work-at-anthropic" target="_blank" rel="noopener noreferrer" className="text-[var(--terminal-green)] hover:underline">How AI is transforming work at Anthropic</a> — AI skill atrophy
+          </li>
+        </ul>
+      </div>
+
       {/* Restart Button */}
       <button
         onClick={onRestart}
