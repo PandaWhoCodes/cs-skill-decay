@@ -6,8 +6,6 @@ import {
   levelBgColors,
   levelTextColors,
   levelLabels,
-  sampleDiagnostics,
-  getLevel,
 } from "@/lib/scoring";
 import SkillBreakdown from "./SkillBreakdown";
 
@@ -105,32 +103,6 @@ export default function Results({ results, onRestart }: { results: QuizResults; 
             Read About the SRE Skill Decay Index &rarr;
           </a>
           <span className="text-[var(--text-dim)] text-sm">Original concept by SigNoz</span>
-        </div>
-      </div>
-
-      {/* Sample Diagnostics */}
-      <div className="w-full">
-        <p className="font-[family-name:var(--font-jetbrains)] uppercase text-[var(--text-dim)] text-xs tracking-wider text-center mb-6">
-          Recent Diagnostics
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {sampleDiagnostics.map((d) => {
-            const lvl = getLevel(d.score);
-            return (
-              <div
-                key={d.role}
-                className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 flex flex-col gap-2"
-              >
-                <p className="font-bold text-sm text-[var(--text)]">{d.role}</p>
-                <p className="text-sm italic text-[var(--text-dim)] before:content-[open-quote] after:content-[close-quote]">
-                  {d.roast}
-                </p>
-                <p className={`text-2xl font-bold mt-auto ${levelTextColors[lvl]}`}>
-                  {d.score.toFixed(1)}
-                </p>
-              </div>
-            );
-          })}
         </div>
       </div>
 

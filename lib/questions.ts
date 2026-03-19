@@ -18,10 +18,10 @@ export const questions: Question[] = [
     question: "A 12x data increase caused a 180x slowdown. What\u2019s happening?",
     category: "algorithms",
     options: [
-      { text: "There\u2019s an accidentally quadratic algorithm \u2014 likely parsing each entry with a function that\u2019s secretly O(n) itself (like strlen on every read of a growing buffer), or checking for duplicates by scanning the full list on each insert. 12x data with O(n\u00b2) behavior gives ~144x slowdown \u2014 that matches. Find the nested loop hiding inside a \u201csimple\u201d parse.", score: 0 },
-      { text: "The JSON file is too large for the parser\u2019s memory buffer, so it\u2019s doing excessive disk I/O \u2014 swapping parts of the file in and out. Switch to a streaming JSON parser to fix it.", score: 2 },
-      { text: "The startup is I/O bound \u2014 63,000 entries means more disk reads. Use an SSD or load the config from a faster storage backend like Redis.", score: 3 },
-      { text: "The JSON parser has O(n log n) behavior because it\u2019s building a sorted index internally. The superlinear growth is expected for this data size \u2014 optimize by splitting the config into smaller files.", score: 1 },
+      { text: "There\u2019s an accidentally quadratic algorithm hidden in the parse \u2014 something like strlen being called on every read of a growing buffer, or duplicate checking by scanning the full list on each insert. A 12x increase in n with O(n\u00b2) behavior yields ~144x slowdown, which matches the observed 180x. The fix is to find the nested linear scan hiding behind a seemingly simple operation.", score: 0 },
+      { text: "The JSON parser has O(n log n) behavior because it\u2019s internally building a balanced tree or sorted index structure as it ingests entries. The superlinear growth is expected and consistent with the data size jump. The fix is to split the config into multiple smaller files so each parse stays within the fast range of the algorithm\u2019s curve.", score: 1 },
+      { text: "The file has outgrown the parser\u2019s in-memory buffer and it\u2019s spilling to disk on every token read. This turns what was a fast memory operation into repeated disk I/O with seek penalties. A streaming JSON parser that processes tokens without buffering the full document would eliminate the spill and restore linear performance.", score: 2 },
+      { text: "The startup is I/O bound because 63,000 entries means significantly more sequential disk reads, and the filesystem is fragmenting the larger file across more blocks. Moving the config to Redis or another in-memory store would eliminate the disk bottleneck and bring startup back under a few seconds regardless of entry count.", score: 3 },
     ],
   },
   {
@@ -29,10 +29,10 @@ export const questions: Question[] = [
     question: "Sub-millisecond network, sub-millisecond processing, but an exact 200ms penalty on every call. What\u2019s causing it?",
     category: "systems",
     options: [
-      { text: "Nagle\u2019s algorithm is buffering the small write, waiting for an ACK before sending. Meanwhile, TCP delayed ACK on the other side is holding the ACK for up to 200ms hoping to piggyback it on a response. Neither side yields \u2014 it\u2019s a deadlock that resolves on a timer. Set TCP_NODELAY on the socket to disable Nagle\u2019s algorithm.", score: 0 },
-      { text: "There\u2019s a 200ms connection pool timeout \u2014 when no idle connection is available, the client waits 200ms before creating a new one. The pool is undersized for the request rate. Increase the pool size.", score: 1 },
-      { text: "The RPC framework has a built-in retry delay \u2014 the first attempt silently fails due to a serialization mismatch, and the 200ms is the retry backoff interval. Check the framework\u2019s retry configuration.", score: 2 },
-      { text: "It\u2019s a DNS resolution delay \u2014 each RPC call is resolving the service hostname, and the DNS TTL or lookup is adding 200ms. Cache the DNS resolution or use IP addresses directly.", score: 3 },
+      { text: "It\u2019s a DNS resolution delay \u2014 each RPC call is performing a fresh hostname lookup instead of caching the resolved address. The 200ms is the round-trip to the DNS server plus its internal lookup time, which is consistent and repeatable. Switch to IP addresses directly or configure the resolver to cache aggressively with a longer TTL.", score: 3 },
+      { text: "Nagle\u2019s algorithm is buffering the small write, waiting for an ACK before sending. Meanwhile, TCP delayed ACK on the receiver is holding the ACK for up to 200ms hoping to piggyback it on a response. Neither side yields \u2014 it\u2019s a protocol-level deadlock that resolves only when the delayed ACK timer fires. Set TCP_NODELAY to disable Nagle\u2019s buffering.", score: 0 },
+      { text: "The RPC framework has a built-in retry mechanism with a 200ms backoff delay. The first attempt is silently failing due to a serialization version mismatch between the two services, and the second attempt succeeds. The exact timing comes from the hardcoded retry interval in the framework\u2019s default configuration.", score: 2 },
+      { text: "The connection pool has a 200ms acquisition timeout \u2014 when no idle connection is immediately available, the client waits exactly that long before spinning up a new one. The pool is undersized for the current request rate, so every call hits the timeout ceiling before getting a connection. Increase the max pool size.", score: 1 },
     ],
   },
   {
@@ -40,10 +40,10 @@ export const questions: Question[] = [
     question: "A \u201csimple\u201d regex is consuming infinite CPU. What property of this pattern makes it catastrophic?",
     category: "debugging",
     options: [
-      { text: "It\u2019s catastrophic backtracking \u2014 the nested .* quantifiers create exponentially many ways to match the same input. When the regex engine fails to match, it backtracks through all possible combinations of where each .* could have consumed characters. For an n-character string, this is O(2\u207f) in the worst case. The fix: use atomic groups, possessive quantifiers, or rewrite to avoid nested wildcards entirely.", score: 0 },
-      { text: "The regex is matching against every incoming request\u2019s full body, and the sheer volume of text being scanned across millions of requests per second is overwhelming the CPU \u2014 switch to matching only the URL and headers.", score: 2 },
-      { text: "The regex engine is compiled at runtime for each request instead of being pre-compiled. The compilation cost multiplied by millions of requests is the bottleneck \u2014 pre-compile the regex at startup.", score: 1 },
-      { text: "The WAF is running in synchronous mode, blocking each request until the regex completes. Put the regex evaluation behind an async queue with a timeout so it doesn\u2019t block the main request thread.", score: 3 },
+      { text: "The regex engine is being compiled from source on every incoming request rather than being pre-compiled and cached at startup. The compilation involves parsing the pattern into an NFA, optimizing it, and generating bytecode \u2014 multiplied by millions of requests per second, this compilation overhead alone saturates all available CPU cores.", score: 1 },
+      { text: "It\u2019s catastrophic backtracking \u2014 the nested .* quantifiers inside the group create exponentially many ways the engine can partition the input between the outer and inner wildcards. When no match is found, the engine exhausts all O(2\u207f) possible partitions before giving up. A single long input string can take minutes. The fix is atomic groups, possessive quantifiers, or eliminating nested wildcards.", score: 0 },
+      { text: "The WAF is evaluating the regex synchronously on the request-handling thread, and the blocking nature means each in-flight request holds a thread hostage while the regex runs. With the thread pool fully consumed, no new requests can be accepted, and the deploy system\u2019s health checks also get blocked, preventing rollback.", score: 3 },
+      { text: "The regex is being evaluated against the entire HTTP request body for every incoming request, including large file uploads and API payloads. At millions of requests per second with varying body sizes, the sheer volume of text being scanned by even a well-behaved regex is enough to overwhelm the CPU. Restrict matching to headers and URL only.", score: 2 },
     ],
   },
   {
@@ -51,10 +51,10 @@ export const questions: Question[] = [
     question: "The cache is healthy but empty. The database is drowning. What happened and what\u2019s the fix?",
     category: "architecture",
     options: [
-      { text: "Cache stampede \u2014 all keys expired simultaneously because they share the same TTL. Thousands of concurrent requests all see a cache miss at once and each independently queries the database. The database can\u2019t handle the sudden thundering herd. Fix: add random jitter to TTLs (e.g., 55\u201365 min instead of exactly 60), implement lock-based recomputation (only one request recomputes while others wait), or use stale-while-revalidate to serve expired data while refreshing in the background.", score: 0 },
-      { text: "Redis hit a memory limit at 3:00 AM and evicted all keys using its eviction policy. The database spike is from all the cache misses after eviction. Increase Redis memory limits.", score: 1 },
-      { text: "The cache warming job that runs at 2:00 AM failed today, so the data was never cached. Add monitoring and alerts on the cache warming pipeline so you catch failures before they cascade.", score: 2 },
-      { text: "Scale up the database to handle the load \u2014 if the database can\u2019t handle direct traffic, that\u2019s the real problem. The cache is masking an undersized database.", score: 3 },
+      { text: "Redis hit its configured maxmemory limit at exactly 3:00 AM and began evicting keys aggressively under its allkeys-lru policy. The sudden mass eviction dropped the hit rate to near zero, and all traffic fell through to the database simultaneously. Increase Redis memory limits and monitor eviction metrics to catch this before it cascades.", score: 1 },
+      { text: "The cache warming pipeline that runs at 2:00 AM failed silently today \u2014 no data was written to Redis, so when the previous keys expired at 3:00 AM there was nothing to replace them. All requests hit the database directly. Add health checks and alerting on the warming job so failures are caught within minutes, not after the outage.", score: 2 },
+      { text: "Cache stampede \u2014 every key was written at the same time with the same TTL, so they all expired simultaneously at 3:00 AM. Thousands of concurrent requests each independently saw a cache miss and queried the database, creating a thundering herd that overwhelmed it. Fix with TTL jitter (randomize expiry across a range), mutex-based recomputation, or stale-while-revalidate.", score: 0 },
+      { text: "The database is fundamentally undersized for direct traffic \u2014 the cache has been masking this for months. Rather than patching the cache layer, the real fix is to vertically scale the database or add read replicas so it can handle the full request load even during cache misses, eliminating this single point of failure.", score: 3 },
     ],
   },
   {
@@ -62,10 +62,10 @@ export const questions: Question[] = [
     question: "One 2MB request takes down your entire server for 30 minutes. How?",
     category: "algorithms",
     options: [
-      { text: "Hash collision attack \u2014 the attacker crafted 100K parameter names that all hash to the same bucket. Your language\u2019s hash table degenerates from O(1) to O(n) per lookup, making insertion of n keys O(n\u00b2). With 100K keys, that\u2019s 10 billion operations from a single request. Fix: use a randomized hash function (SipHash), limit the number of POST parameters, or set a request processing timeout.", score: 0 },
-      { text: "The server is trying to parse 100K parameters into a deeply nested object structure, and the recursive parsing is blowing the call stack, causing repeated stack overflow recoveries that consume CPU. Limit request body depth.", score: 2 },
-      { text: "The form parameters are being validated against a database, and 100K individual queries are overwhelming the connection pool. Add batch validation or rate-limit the number of parameters per request.", score: 3 },
-      { text: "The server\u2019s parameter parsing has O(n log n) sorting overhead \u2014 it alphabetizes form parameters for canonical representation. With 100K parameters, the sort is expensive. Disable parameter sorting.", score: 1 },
+      { text: "The form parameters are each being individually validated against a database lookup, and 100K sequential queries are exhausting the connection pool. Every other request in the application is now starved for database connections, creating a cascading failure. Rate-limit the number of parameters per request and batch validation queries together.", score: 3 },
+      { text: "Hash collision attack \u2014 the attacker crafted 100K parameter names that all hash to the same bucket in your language\u2019s hash table implementation. Every insert degenerates from O(1) to O(n) as it walks the collision chain, making total insertion O(n\u00b2). With 100K keys that\u2019s ~10 billion operations. Fix with randomized hashing (SipHash), a parameter count limit, or a per-request CPU timeout.", score: 0 },
+      { text: "The server\u2019s parameter parsing step is performing O(n log n) sorting \u2014 it canonicalizes form parameters into alphabetical order for consistent logging and signature verification. With 100K string parameters the comparison-heavy sort becomes extremely expensive, especially with long key names that share common prefixes.", score: 1 },
+      { text: "The recursive descent parser is trying to build 100K parameters into a deeply nested object tree, and the deep recursion is repeatedly overflowing the call stack. Each stack overflow triggers an expensive recovery and restart of the parsing from a checkpoint, burning CPU in an endless loop of crash-and-retry cycles.", score: 2 },
     ],
   },
   {
@@ -73,10 +73,10 @@ export const questions: Question[] = [
     question: "The code looks right, the tests pass, but real money is disappearing. What\u2019s wrong?",
     category: "systems",
     options: [
-      { text: "IEEE 754 floating-point can\u2019t represent most decimal fractions exactly \u2014 0.1 + 0.2 = 0.30000000000000004 in every language. Multiplying prices by quantities by tax rates compounds tiny representation errors, and rounding to cents pushes them across the $0.01 boundary. Fix: use integer arithmetic in cents (or smallest currency unit), or a decimal type with exact representation. The tests pass because they compare with insufficient precision or use round numbers.", score: 0 },
-      { text: "There\u2019s a race condition in the transaction pipeline \u2014 two concurrent transactions occasionally read the same balance, and the last write wins, causing a one-cent discrepancy. Add database-level locking on balance updates.", score: 2 },
-      { text: "The tax rate calculation is using a stale rate \u2014 when tax rates update, some in-flight transactions use the old rate, creating a rounding difference. Ensure atomic tax rate updates across all workers.", score: 1 },
-      { text: "The database is truncating values on storage \u2014 doubles in the application have more precision than the DECIMAL(10,2) column in the database, so values are being rounded during writes. Match the precision between application and database.", score: 3 },
+      { text: "The tax rate table is being updated asynchronously, and during the propagation window some workers still use the old rate while others have the new one. This creates a systematic one-cent rounding difference on transactions that span the update boundary. The fix is atomic rate propagation \u2014 all workers must switch simultaneously via a versioned config.", score: 1 },
+      { text: "IEEE 754 floating-point cannot represent most decimal fractions exactly \u2014 0.1 + 0.2 equals 0.30000000000000004 in every language. Multiplying prices by quantities by tax rates compounds these tiny representation errors, and final rounding to cents pushes some results across the penny boundary. Fix by using integer arithmetic in the smallest currency unit, or a decimal type with exact representation.", score: 0 },
+      { text: "There\u2019s a race condition in the transaction pipeline where two concurrent operations read the same account balance before either writes. The second write overwrites the first, creating a one-cent discrepancy that exactly matches the rounding difference between the two concurrent calculations. Database-level row locking on balance updates would serialize the conflicting writes.", score: 2 },
+      { text: "The database column is defined as DECIMAL(10,2) but the application sends values as IEEE 754 doubles over the wire. The database driver silently rounds during the type conversion on every write, and the rounding direction depends on the exact bit pattern. Matching the application\u2019s type to the column type eliminates the conversion loss.", score: 3 },
     ],
   },
   {
@@ -84,10 +84,10 @@ export const questions: Question[] = [
     question: "Be honest. What happens next?",
     category: "meta",
     options: [
-      { text: "You start from the entry point \u2014 find where the request comes in, trace the data flow function by function with a debugger or print statements, rebuild the mental model manually. You\u2019ve read code you didn\u2019t write before (open source, coworkers\u2019 code, legacy systems). This is the same skill. The AI was a speed boost for writing \u2014 reading and reasoning is still yours.", score: 0 },
-      { text: "You write a failing test that reproduces the bug first, then use that as a guardrail while you read through the code. You may not understand the whole file, but you only need to understand the path the bug takes. Narrow the scope, trace the failure.", score: 1 },
-      { text: "You search git blame and PR comments to understand the intent behind each function, then check if the AI-generated code matches common patterns from the framework docs. Reconstruct the \u201cwhy\u201d from external context rather than reading the code directly.", score: 2 },
-      { text: "You wait for the AI to come back online \u2014 have it explain the code to you, then have it suggest the fix. Use the downtime to document the bug and gather reproduction steps. The AI wrote it; the AI should debug it.", score: 3 },
+      { text: "You search git blame to find the commit messages and PR descriptions that explain the intent behind each function, then cross-reference the AI-generated code with common patterns from the framework\u2019s official documentation. You reconstruct the \u201cwhy\u201d from external context \u2014 changelogs, review comments, ticket descriptions \u2014 rather than trying to read the code cold.", score: 2 },
+      { text: "You write a minimal failing test that reproduces the bug first, then use that as a guardrail while you read through the unfamiliar code. You don\u2019t need to understand the whole file \u2014 just the execution path the bug takes. Narrow the scope with the test, add print statements along the path, and trace the failure backwards from the assertion.", score: 1 },
+      { text: "You start from the entry point \u2014 find where the request comes in, trace the data flow function by function with a debugger or print statements, and rebuild the mental model manually. You\u2019ve read code you didn\u2019t write before \u2014 open source, coworkers\u2019 code, legacy systems. This is the same skill. The AI was a speed boost for writing; reading and reasoning is still yours.", score: 0 },
+      { text: "You wait for the AI assistant to come back online \u2014 have it explain the code structure to you, walk through the data flow, then suggest the fix. In the meantime you document the bug thoroughly, gather reproduction steps, and check if other users are affected. The AI wrote it, so the AI has the best context to debug it.", score: 3 },
     ],
   },
 ];

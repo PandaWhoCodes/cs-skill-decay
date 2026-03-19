@@ -1,7 +1,17 @@
 "use client";
 
-import { Question, optionLabels } from "@/lib/questions";
+import { useMemo } from "react";
+import { Question, QuestionOption, optionLabels } from "@/lib/questions";
 import { CategoryId } from "@/lib/scoring";
+
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 interface QuizProps {
   currentQuestion: number;
@@ -17,6 +27,11 @@ export default function Quiz({
   onAnswer,
 }: QuizProps) {
   const progressPercent = (currentQuestion / totalQuestions) * 100;
+  const shuffledOptions = useMemo<QuestionOption[]>(
+    () => shuffleArray(question.options),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentQuestion]
+  );
 
   return (
     <>
@@ -72,7 +87,7 @@ export default function Quiz({
 
           {/* Option buttons */}
           <div className="flex flex-col gap-3">
-            {question.options.map((option, index) => (
+            {shuffledOptions.map((option, index) => (
               <button
                 key={index}
                 onClick={() => onAnswer(option.score, question.category)}
