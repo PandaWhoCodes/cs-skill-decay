@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Outfit, Syne } from "next/font/google";
+import { JetBrains_Mono, Poppins, Syne } from "next/font/google";
 import "./globals.css";
 
 const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains" });
-const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+const poppins = Poppins({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-poppins" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 
 export const metadata: Metadata = {
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${jetbrains.variable} ${outfit.variable} ${syne.variable} dark`}
+      className={`${jetbrains.variable} ${poppins.variable} ${syne.variable} dark`}
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-[var(--bg)] text-[var(--text)] antialiased">{children}</body>

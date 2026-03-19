@@ -93,7 +93,7 @@ export default function Hero({ onStart }: { onStart: () => void }) {
 
       {/* Subheadline */}
       <p
-        className="relative z-10 text-center font-[family-name:var(--font-outfit)] text-lg text-[var(--text-dim)] max-w-xl mb-10 leading-relaxed"
+        className="relative z-10 text-center font-[family-name:var(--font-poppins)] text-lg text-[var(--text-dim)] max-w-xl mb-10 leading-relaxed"
         style={{ animation: 'fadeUp 0.8s ease 0.25s both' }}
       >
         7 real-world CS scenarios. Zero AI assistance.
@@ -149,16 +149,6 @@ export default function Hero({ onStart }: { onStart: () => void }) {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="font-[family-name:var(--font-jetbrains)] text-[10px] uppercase tracking-widest text-[var(--text-dim)]">
-          Scroll
-        </span>
-        <span
-          className="block w-px h-6 bg-[var(--text-dim)] opacity-50"
-          style={{ animation: 'scrollBounce 2s ease-in-out infinite' }}
-        />
-      </div>
     </section>
   );
 }

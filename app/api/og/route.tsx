@@ -70,6 +70,7 @@ export async function GET(request: NextRequest) {
       >
         <div
           style={{
+            display: "flex",
             fontSize: 20,
             letterSpacing: 4,
             color: "#737373",
@@ -81,6 +82,7 @@ export async function GET(request: NextRequest) {
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 120,
             fontWeight: 800,
             color,
@@ -91,6 +93,7 @@ export async function GET(request: NextRequest) {
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 24,
             color,
             marginTop: 16,
@@ -103,6 +106,7 @@ export async function GET(request: NextRequest) {
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 22,
             color: "#a3a3a3",
             marginTop: 30,
@@ -112,16 +116,17 @@ export async function GET(request: NextRequest) {
             lineHeight: 1.5,
           }}
         >
-          &ldquo;{roastText}&rdquo;
+          {`\u201C${roastText}\u201D`}
         </div>
         <div
           style={{
+            display: "flex",
             fontSize: 18,
             color: "#525252",
             marginTop: 40,
           }}
         >
-          How deskilled are YOU? → Take the quiz
+          How deskilled are YOU? Take the quiz
         </div>
       </div>
     ),

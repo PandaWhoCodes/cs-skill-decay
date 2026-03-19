@@ -15,7 +15,7 @@
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --font-mono: var(--font-jetbrains);
-  --font-sans: var(--font-outfit);
+  --font-sans: var(--font-poppins);
   --font-display: var(--font-syne);
 }
 
@@ -130,5 +130,5 @@ body {
 /* Decay page wrapper — scopes font variables */
 
 .decay-page {
-  font-family: var(--font-outfit), sans-serif;
+  font-family: var(--font-poppins), sans-serif;
 }
