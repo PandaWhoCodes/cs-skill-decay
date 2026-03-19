@@ -16,7 +16,7 @@
   --color-foreground: var(--text);
   --font-mono: var(--font-jetbrains);
   --font-sans: var(--font-poppins);
-  --font-display: var(--font-syne);
+  --font-display: var(--font-poppins);
 }
 
 /* Keyframe animations */

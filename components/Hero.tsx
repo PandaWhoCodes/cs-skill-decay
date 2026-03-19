@@ -72,7 +72,7 @@ export default function Hero({ onStart }: { onStart: () => void }) {
 
       {/* Headline */}
       <h1
-        className="relative z-10 text-center font-[family-name:var(--font-syne)] font-extrabold leading-[1.1] mb-6"
+        className="relative z-10 text-center font-[family-name:var(--font-poppins)] font-extrabold leading-[1.1] mb-6"
         style={{
           fontSize: 'clamp(42px, 8vw, 80px)',
           animation: 'fadeUp 0.8s ease 0.1s both',

@@ -33,7 +33,7 @@ export default function Results({ results, onRestart }: { results: QuizResults; 
             Your Skill Decay Index
           </p>
           <p
-            className={`font-[family-name:var(--font-syne)] text-[56px] leading-none font-extrabold ${levelTextColors[results.level]}`}
+            className={`font-[family-name:var(--font-poppins)] text-[56px] leading-none font-extrabold ${levelTextColors[results.level]}`}
             style={{ animation: "scoreReveal 0.6s ease-out both" }}
           >
             {results.display}
