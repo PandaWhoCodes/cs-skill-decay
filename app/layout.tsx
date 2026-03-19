@@ -9,17 +9,20 @@ export const metadata: Metadata = {
   title: "CS Skill Decay Index",
   description:
     "7 real-world CS scenarios. Zero AI assistance. Find out how much muscle memory you've lost since you started letting copilots think for you.",
+  metadataBase: new URL("https://csdecay.ashish.ch"),
   openGraph: {
     title: "CS Skill Decay Index",
     description:
       "7 real-world CS scenarios. Zero AI assistance. Find out how much muscle memory you've lost since you started letting copilots think for you.",
     type: "website",
+    images: [{ url: "/api/og?score=4.2&level=mid&r=0", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "CS Skill Decay Index",
     description:
       "7 real-world CS scenarios. Zero AI assistance. Find out how much muscle memory you've lost since you started letting copilots think for you.",
+    images: ["/api/og?score=4.2&level=mid&r=0"],
   },
 };
 
