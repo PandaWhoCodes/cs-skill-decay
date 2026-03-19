@@ -27,7 +27,7 @@ export default function Quiz({
             CS Skill Decay Index
           </span>
           <span className="font-[family-name:var(--font-jetbrains)] text-xs text-[var(--text-dim)]">
-            {currentQuestion} / {totalQuestions}
+            {currentQuestion + 1} / {totalQuestions}
           </span>
         </div>
         <div className="h-[2px] w-full bg-[var(--border)]">
@@ -49,7 +49,7 @@ export default function Quiz({
         >
           {/* Question label */}
           <p className="font-[family-name:var(--font-jetbrains)] text-xs uppercase tracking-widest text-[var(--text-dim)] mb-4">
-            Question {currentQuestion}
+            Question {currentQuestion + 1}
           </p>
 
           {/* Terminal scenario box */}
@@ -60,13 +60,13 @@ export default function Quiz({
             >
               &gt;
             </span>
-            <p className="pl-4 font-[family-name:var(--font-jetbrains)] text-xs leading-[1.7] text-[var(--terminal-green)]">
+            <p className="pl-4 font-[family-name:var(--font-jetbrains)] text-sm leading-[1.8] text-[var(--terminal-green)]">
               {question.scenario}
             </p>
           </div>
 
           {/* Question text */}
-          <h2 className="font-[family-name:var(--font-syne)] text-[22px] font-bold mb-9">
+          <h2 className="font-[family-name:var(--font-poppins)] text-[22px] font-bold leading-snug mb-9">
             {question.question}
           </h2>
 
@@ -81,7 +81,7 @@ export default function Quiz({
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded border border-[var(--border)] font-[family-name:var(--font-jetbrains)] text-xs text-[var(--text-dim)] transition-all duration-200 group-hover:border-[var(--accent)] group-hover:bg-[var(--accent)] group-hover:text-white">
                   {optionLabels[index]}
                 </span>
-                <span className="text-[15px] text-[var(--text)]">
+                <span className="font-[family-name:var(--font-poppins)] text-[15px] leading-relaxed text-[var(--text)]">
                   {option.text}
                 </span>
               </button>
